@@ -1,0 +1,26 @@
+image: docker:latest
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay
+
+stages:
+  - build
+  - package
+  - deploy
+
+maven-build:
+  image: maven:3-jdk-8
+  stage: build
+  script: 'mvn clean install'
+  artifacts:
+    paths:
+      - target/*.war
+
+docker-build:
+  stage: package
+  script:
+    - docker build -t registry.gitlab.com/talir69/spring-angular .
+    - docker login -u h8vaS37ZNF2DVpG -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker push registry.gitlab.com/talir69/spring-angular
